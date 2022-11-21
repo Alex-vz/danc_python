@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.2">
+  <zoom_level>10</zoom_level>
+  <element>
+    <type>com.baselet.element.old.allinone.ActivityDiagramText</type>
+    <coordinates>
+      <x>40</x>
+      <y>0</y>
+      <w>188</w>
+      <h>245</h>
+    </coordinates>
+    <panel_attributes>title: Read data
+Start
+show visual form
+load data
+display data
+End
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.baselet.element.old.allinone.ActivityDiagramText</type>
+    <coordinates>
+      <x>270</x>
+      <y>0</y>
+      <w>450</w>
+      <h>1011</h>
+    </coordinates>
+    <panel_attributes>title:edit data
+Start
+select data
+load data
+display data\for edit
+user fulfil fields~U1
+wait commit|cancel&gt;
+&gt;commit
+check data localy
+If
+	[has errors]
+	show errors~SE-&gt;U1
+	
+	[correct]
+	send to server
+	If
+		[has error]
+		show errors-&gt;U1
+		
+		[correct]
+EndIf-&gt;END
+&gt;cancel
+clear form
+do next stage~END
+End
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

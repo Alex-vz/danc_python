@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  web:
+    environment:
+        - PROJECTNAME=myproj
+    build: 
+        context: .
+        dockerfile: Dockerfile.docker
+    command: serve
+    volumes:
+      - ./code:/usr/projects/danc
+    ports:
+      - "8080:8080"

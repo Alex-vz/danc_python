@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.2">
+  <zoom_level>10</zoom_level>
+  <element>
+    <type>com.baselet.element.old.allinone.ActivityDiagramText</type>
+    <coordinates>
+      <x>190</x>
+      <y>0</y>
+      <w>548</w>
+      <h>1187</h>
+    </coordinates>
+    <panel_attributes>title:Редактирование списка модальной формой.
+Start
+Отобразить форму-список
+If
+	[редактировать строку]
+	открыть форму
+	загрузить данные
+	
+	[создать новый]
+	открыть форму
+	отобразить стартовые\данные
+EndIf
+Отобразить модальную\форму
+просмотр/\редактирование\данных~runForm
+Сохранить/\отменить&gt;
+&gt;сохранить
+выполнить сохранение
+If
+	[Успешно]
+	закрыть модаль
+
+	[Ошибки]
+	Отобразить ошибки
+	-&gt;runForm
+EndIf
+обновить список
+-&gt;End
+
+&gt;отменить
+Закрыть модаль
+Обновить список
+|
+
+End</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

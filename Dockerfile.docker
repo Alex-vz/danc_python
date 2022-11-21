@@ -1,0 +1,16 @@
+FROM python:3.8
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONIOENCODING utf-8
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt-get update \
+    && apt-get install -y locales locales-all
+ENV LANGUAGE ru_RU.UTF-8
+ENV LANG ru_RU.UTF-8
+ENV LC_ALL ru_RU.UTF-8
+RUN pip install --no-cache-dir -U pip
+RUN mkdir -p /usr/projects/danc/
+COPY ./code/requirements.txt /usr/projects/requirements.txt
+RUN pip install --no-cache-dir -r /usr/projects/requirements.txt
+COPY ./scripts/py_docker.sh /usr/projects/py_docker.sh
+WORKDIR /usr/projects/danc/
+ENTRYPOINT ["/usr/projects/py_docker.sh"]
