@@ -56,12 +56,15 @@ def proc_module(base_dir, path):
         traceback.print_exc()
         return '<div style="color:red;fomt-weight:bold;">Ошибка иморта</div>'
 
-    dtype = module["DIAGRAM_TYPE"]
+    dtype = module.get("DIAGRAM_TYPE")
     if not dtype:
         return '<div style="color:red;fomt-weight:bold;">Неизвестный тип диаграммы</div>'
-    draw_func = module["draw"]
-    if not draw_func:
+
+    draw_func = module.get("draw")
+    code_block = module.get("CODE")
+    if not (draw_func or code_block):
         return '<div style="color:red;fomt-weight:bold;">Неопределен код диаграммы</div>'
+
 
     title = module.get("TITLE", path)
     description = module.get("DESCRIPTION", "&nbsp;")
@@ -70,7 +73,10 @@ def proc_module(base_dir, path):
     diagram = danc.Diagram()
     try:
         d = diagram.init_draw(dtype)
-        draw_func(d)
+        if draw_func:
+            draw_func(d)
+        else:
+            d.code(code_block)
         image_url = diagram.perp_url(d)
     except Exception as e:
         traceback.print_exc()

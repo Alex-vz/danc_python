@@ -105,6 +105,3 @@ workspace "Amazon Web Services Example" "An example AWS deployment architecture.
 
 }
 """
-
-def draw(d):
-    d.code(CODE)

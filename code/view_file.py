@@ -21,6 +21,8 @@ python view_file.py py ./data/marm_example2.py
 
 python view_file.py py ./data/subdir/marm_example.py
 
+python view_file.py py ./data/subdir/aws_example.py
+
 python view_file.py structurizr ./data/structuriz.dsl
 
 python view_file.py structurizr ./data/subdir/aws.dsl
@@ -37,9 +39,17 @@ def run_module(args):
     mc = compile(buf, "<string>", "exec")
     module = {}
     exec(mc, module)
+    draw_func = module.get("draw")
+    code_block = module.get("CODE")
+    if not (draw_func or code_block):
+        raise Exception("No diagram code!")
+
     diagram = Diagram()
     d = diagram.init_draw(module["DIAGRAM_TYPE"])
-    module["draw"](d)
+    if draw_func:
+        draw_func(d)
+    else:
+        d.code(code_block)
     return (diagram, d)
 
 def run(args):
@@ -50,7 +60,7 @@ def run(args):
 
     if args.out_file:
         diagram.render_to_file(d, args.out_file)
-        print(f"File {args.out_file} created.")
+        print("File {} created.".format(args.out_file))
     elif args.url_only=='1':
         print(diagram.perp_url(d))
     else:
