@@ -20,5 +20,5 @@ def draw(d):
     s_join = d.join()
     d.l("B",s_join)
     d.l("C",s_join)
-    d.l(s_join, "D")
-    d.l("D", None)
+    d.l(s_join, "D1")
+    d.l("D1", None)

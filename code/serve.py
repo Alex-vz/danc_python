@@ -4,10 +4,12 @@ Very simple HTTP server in python for logging requests
 Usage::
     ./server.py [<port>]
 """
+import argparse
+from pathlib import Path
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import logging
 import traceback
-
 
 from urllib.parse import urlparse, parse_qs
 
@@ -17,7 +19,13 @@ import danc_python as danc
 def list_dir(base_dir, dirname):
     """
     """
-    ld = danc.list_dir(base_dir, dirname)
+    ld, descr = danc.list_dir(base_dir, dirname)
+    if not descr:
+        c_title = "Каталог"
+        c_description = ""
+    else:
+        c_title = descr["title"]
+        c_description = descr["description"]
 
     res = "<ul>"
 
@@ -36,19 +44,23 @@ def list_dir(base_dir, dirname):
 
     res += "</ul>"
 
-    return res
+    return res, c_title, c_description
 
 
 def proc_dir(base_dir, path):
     base_dir, path = _dir_clear(base_dir, path)
-    content = list_dir(base_dir, path)
-    return DIR_BODY.format(content=content)
+    content, title, description = list_dir(base_dir, path)
+    return DIR_BODY.format(content=content, title=title, description=description)
 
 
 def proc_module(base_dir, path):
-    base_dir, path = _dir_clear(base_dir, path)
+    #base_dir, path = _dir_clear(base_dir, path)
 
-    in_file = base_dir + path 
+    #in_file = base_dir + path 
+    base_dir = Path(base_dir)
+    path = Path("."+path)
+
+    in_file = base_dir / path 
 
     try:
         module = danc.load_module(in_file)
@@ -66,7 +78,7 @@ def proc_module(base_dir, path):
         return '<div style="color:red;fomt-weight:bold;">Неопределен код диаграммы</div>'
 
 
-    title = module.get("TITLE", path)
+    title = module.get("TITLE", str(path))
     description = module.get("DESCRIPTION", "&nbsp;")
     detail = module.get("DETAIL", "&nbsp;")
 
@@ -103,7 +115,7 @@ BODY = """
 """
 
 DIR_BODY = """
-    <h1>Каталог</h1>
+    <h1 title="{description}">{title}</h1>
     <div>{content}</div>
 """
 
@@ -127,15 +139,13 @@ def _dir_clear(base_dir, dir_path):
 
 
 class S(BaseHTTPRequestHandler):
+
+    BASE_DIR = "."
+
     def _set_response(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-
-    def do_GET_0(self):
-        logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
-        self._set_response()
-        self.wfile.write("GET request for {}".format(self.path).encode('utf-8'))
 
     def do_GET(self):
         #logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
@@ -148,9 +158,9 @@ class S(BaseHTTPRequestHandler):
         if cpath=="/favicon.ico":
             return
         elif cpath.endswith(".py"):
-            content = proc_module(BASE_DIR, cpath)
+            content = proc_module(self.BASE_DIR, cpath)
         else:
-            content = proc_dir(BASE_DIR, cpath)
+            content = proc_dir(self.BASE_DIR, cpath)
         self.wfile.write(BODY.format(request=msg, content=content).encode('utf-8'))
 
     def do_POST(self):
@@ -162,9 +172,14 @@ class S(BaseHTTPRequestHandler):
         self._set_response()
         self.wfile.write("POST request for {}".format(self.path).encode('utf-8'))
 
-def run(server_class=HTTPServer, handler_class=S, port=8080):
+def run(args):
+    server_class = HTTPServer 
+    handler_class = S 
+    S.BASE_DIR = args.base_dir
+    port = args.out_port
+    address = args.out_address
     logging.basicConfig(level=logging.INFO)
-    server_address = ('0.0.0.0', port)
+    server_address = (address, port)
     httpd = server_class(server_address, handler_class)
     logging.info('Starting httpd...\n')
     try:
@@ -175,12 +190,16 @@ def run(server_class=HTTPServer, handler_class=S, port=8080):
     logging.info('Stopping httpd...\n')
 
 
-BASE_DIR = "./data"
+#BASE_DIR = "./data"
 
 if __name__ == '__main__':
-    from sys import argv
+    parser = argparse.ArgumentParser(description='Process diagram and open in browser.')
+    parser.add_argument('-p', type=int, dest="out_port", metavar="port", 
+                        help='listen port, default=8080', default=8080)
+    parser.add_argument('-a', type=str, dest="out_address", metavar="address", 
+                        help='listen address, default="127.0.0.1"', default="127.0.0.1")
+    parser.add_argument('-d', type=str, dest="base_dir", metavar="datadir", 
+                        help='directory to start from, default="./data"', default="./data")
 
-    if len(argv) == 2:
-        run(port=int(argv[1]))
-    else:
-        run()
+    run(parser.parse_args())
+
